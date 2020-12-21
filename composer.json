@@ -1,0 +1,43 @@
+{
+  "name": "exteon/mapping-class-loader",
+  "version": "1.0.0",
+  "description": "Library implementing various common file operations",
+  "type": "library",
+  "homepage": "https://github.com/exteon/mapping-class-loader",
+  "authors": [
+    {
+      "name": "Dinu Marina"
+    }
+  ],
+  "license": "https://www.apache.org/licenses/LICENSE-2.0",
+  "autoload": {
+    "psr-4": {
+      "Exteon\\Loader\\MappingClassLoader\\": [
+        "src",
+        "interfaces"
+      ]
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Test\\Exteon\\Loader\\MappingClassLoader\\": [
+        "test"
+      ]
+    }
+  },
+  "repositories": {
+    "exteon-file-helper": {
+      "type": "vcs",
+      "url": "https://github.com/exteon/file-helper"
+    }
+  },
+  "require": {
+    "exteon/file-helper": "^1.1.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^8.5"
+  },
+  "suggest": {
+    "ext-xdebug": "*"
+  }
+}
