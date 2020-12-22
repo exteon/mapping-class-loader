@@ -279,7 +279,7 @@ for the class.
 
     $loader->register();
     
-    var_dump((new A()->getStaticProperty());
+    var_dump((new A())->getStaticProperty());
 ```
 
 **Note** there will be no overriding behavior of the static `classInit()` 
