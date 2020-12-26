@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "03e56db7e22c84276e839db5a330bf48",
+    "content-hash": "45d1df980c3b022c9eef24037b16dd01",
     "packages": [
         {
             "name": "exteon/file-helper",
-            "version": "1.1.0",
+            "version": "1.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/exteon/file-helper.git",
-                "reference": "43e610023d41d4a88b86fd2c835d600b8fa01d3e"
+                "reference": "c0f019ced68a9cb5a9a974b363432c9a10e83b94"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/exteon/file-helper/zipball/43e610023d41d4a88b86fd2c835d600b8fa01d3e",
-                "reference": "43e610023d41d4a88b86fd2c835d600b8fa01d3e",
+                "url": "https://api.github.com/repos/exteon/file-helper/zipball/c0f019ced68a9cb5a9a974b363432c9a10e83b94",
+                "reference": "c0f019ced68a9cb5a9a974b363432c9a10e83b94",
                 "shasum": ""
             },
             "type": "library",
@@ -28,8 +28,9 @@
                     ]
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "https://www.apache.org/licenses/LICENSE-2.0"
+                "Apache-2.0"
             ],
             "authors": [
                 {
@@ -39,10 +40,10 @@
             "description": "Library implementing various common file operations",
             "homepage": "https://github.com/exteon/file-helper",
             "support": {
-                "source": "https://github.com/exteon/file-helper/tree/1.1.0",
-                "issues": "https://github.com/exteon/file-helper/issues"
+                "issues": "https://github.com/exteon/file-helper/issues",
+                "source": "https://github.com/exteon/file-helper/tree/1.1.1"
             },
-            "time": "2020-12-08T12:36:07+00:00"
+            "time": "2020-12-26T16:54:15+00:00"
         }
     ],
     "packages-dev": [

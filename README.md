@@ -31,7 +31,6 @@ following functionalities:
 ### Installing with `composer`
 
 ```shell script
-composer config repositories.exteon-mapping-class-loader vcs https://github.com/exteon/mapping-class-loader
 composer require exteon/mapping-class-loader
 ```
 
