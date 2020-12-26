@@ -25,9 +25,6 @@ following functionalities:
 ## Requirements
 
 * PHP 7.2
-* The [Weakref](https://pecl.php.net/package/Weakref) extension; support for
-  PHP 7.4's [Weakreference](https://www.php.net/manual/en/class.weakreference.php)
-  is NOT yet implemented.
 
 ## Usage
 
