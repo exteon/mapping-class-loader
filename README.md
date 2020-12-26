@@ -73,7 +73,7 @@ load, which can be one of the three types:
 
 ```php
 <?php
-    use \Exteon\Loader\MappingClassLoader\IClassResolver;
+    use Exteon\Loader\MappingClassLoader\IClassResolver;
     use Exteon\Loader\MappingClassLoader\LoadAction;
 
     class Resolver implements IClassResolver {

@@ -5,6 +5,7 @@ namespace Exteon\Loader\MappingClassLoader;
 use ErrorException;
 use Exception;
 use Exteon\FileHelper;
+use InvalidArgumentException;
 use ReflectionException;
 
 class MappingClassLoader
@@ -26,7 +27,7 @@ class MappingClassLoader
     protected $isCaching;
 
     /** @var IMappingFileLoader */
-    protected $streamWrapLoader;
+    protected $mappingFileLoader;
     /**
      * @var IStaticInitializer[]
      */
@@ -39,16 +40,15 @@ class MappingClassLoader
      * }
      * @param IClassResolver[] $resolvers
      * @param IStaticInitializer[] $initializers
-     * @param IMappingFileLoader $streamWrapLoader
+     * @param IMappingFileLoader $mappingFileLoader
      * @throws Exception
      */
     public function __construct(
         array $config,
         array $resolvers,
         array $initializers,
-        IMappingFileLoader $streamWrapLoader
-    )
-    {
+        IMappingFileLoader $mappingFileLoader
+    ) {
         $this->resolvers = $resolvers;
         $this->initializers = $initializers;
         $this->isCaching = $config['enableCaching'] ?? false;
@@ -58,7 +58,7 @@ class MappingClassLoader
             }
             $this->cacheDir = $config['cacheDir'];
         }
-        $this->streamWrapLoader = $streamWrapLoader;
+        $this->mappingFileLoader = $mappingFileLoader;
     }
 
     /**
@@ -114,7 +114,7 @@ class MappingClassLoader
                 );
                 if (file_exists($mapFilePath)) {
                     $file = file_get_contents($mapFilePath);
-                    $this->streamWrapLoader->doIncludeOnce($cachedFile, $file);
+                    $this->mappingFileLoader->includeOnce($cachedFile, $file);
                 } else {
                     require_once($cachedFile);
                 }
@@ -132,14 +132,14 @@ class MappingClassLoader
         }
         return;
         loaded:
-        $this->doClassInit($class);
+        $this->classInit($class);
     }
 
     /**
      * @param string $class
      * @throws ReflectionException
      */
-    protected function doClassInit(string $class): void
+    protected function classInit(string $class): void
     {
         foreach ($this->initializers as $initializer) {
             $initializer->init($class);
@@ -153,11 +153,16 @@ class MappingClassLoader
      */
     protected function doAction(LoadAction $action): void
     {
+        if (!$action->getClass()) {
+            throw new InvalidArgumentException(
+                'class must be specified'
+            );
+        }
         if ($action->getSource()) {
             if ($this->isCaching) {
-                $cachePath = $this->doCache($action);
+                $cachePath = $this->cache($action);
                 if ($action->getFile()) {
-                    $this->streamWrapLoader->doIncludeOnce(
+                    $this->mappingFileLoader->includeOnce(
                         $cachePath,
                         $action->getFile()
                     );
@@ -166,18 +171,22 @@ class MappingClassLoader
                 }
             } else {
                 if ($action->getFile()) {
-                    $this->streamWrapLoader->doEval(
+                    $this->mappingFileLoader->eval(
                         $action->getSource(),
                         $action->getFile()
                     );
                 } else {
-                    $this->streamWrapLoader->doEval($action->getSource());
+                    $this->mappingFileLoader->eval($action->getSource());
                 }
             }
-        } else {
+        } elseif ($action->getFile()) {
             require_once($action->getFile());
+        } else {
+            throw new InvalidArgumentException(
+                'source or file must be specified'
+            );
         }
-        $this->doClassInit($action->getClass());
+        $this->classInit($action->getClass());
     }
 
     /**
@@ -185,7 +194,7 @@ class MappingClassLoader
      * @return string The cached file path
      * @throws ErrorException
      */
-    protected function doCache(LoadAction $action): string
+    protected function cache(LoadAction $action): string
     {
         $filePath = $this->getCacheFilePath($action->getClass());
         if (!FileHelper::preparePath($filePath, true)) {

@@ -17,19 +17,20 @@ class ClassInitMethodInitializer implements IStaticInitializer
      */
     public function init(string $class): void
     {
-        if (
-            !array_key_exists($class, self::$initClasses) &&
-            class_exists($class, false) &&
-            is_a($class, IClassInitMethodInitializable::class, true)
-        ) {
-            $reflection = new ReflectionClass($class);
-            if ($reflection->hasMethod('classInit')) {
-                $method = $reflection->getMethod('classInit');
-                if ($method->class == $class) {
-                    $class::classInit();
+        if (!array_key_exists($class, self::$initClasses)) {
+            if (
+                class_exists($class, false) &&
+                is_a($class, IClassInitMethodInitializable::class, true)
+            ) {
+                $reflection = new ReflectionClass($class);
+                if ($reflection->hasMethod('classInit')) {
+                    $method = $reflection->getMethod('classInit');
+                    if ($method->class == $class) {
+                        $class::classInit();
+                    }
                 }
+                self::$initClasses[$class] = null;
             }
         }
-        self::$initClasses[$class] = null;
     }
 }

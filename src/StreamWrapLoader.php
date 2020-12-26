@@ -37,7 +37,7 @@ class StreamWrapLoader implements IMappingFileLoader
      * @param string|null $mapToFile
      * @throws Exception
      */
-    public function doEval(string $code, string $mapToFile = null)
+    public function eval(string $code, string $mapToFile = null)
     {
         if (
             $mapToFile &&
@@ -70,7 +70,7 @@ class StreamWrapLoader implements IMappingFileLoader
      * @param string $file
      * @param string $mapToFile
      */
-    public function doIncludeOnce(string $file, string $mapToFile)
+    public function includeOnce(string $file, string $mapToFile)
     {
         if (
             $mapToFile &&
