@@ -9,7 +9,7 @@
       "name": "Dinu Marina"
     }
   ],
-  "license": "https://www.apache.org/licenses/LICENSE-2.0",
+  "license": "Apache-2.0",
   "autoload": {
     "psr-4": {
       "Exteon\\Loader\\MappingClassLoader\\": [
