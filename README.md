@@ -155,6 +155,18 @@ The fields have the following meanings:
 - `$source` is the generated or modified source code to be loaded. If this is 
   null, `$file` must be specified and the meaning is that `$file` will be loaded
   without further processing (or, in other words, conventional loader behavior).
+- `$hintCode` : for generated code, there is sometimes the need to generate some
+  hint classes for the development tools (i.e. developer's GUI or static 
+  analysers). This property provides that code, which can be dumped to a 
+  directory using `MappingClassLoader::dumpHintClasses()`. 
+  
+### `IClassScanner`
+
+Resolvers can (not required but desirable) implement the `IClassScanner` 
+interface to enable functions such as cache pregeneration and hint file dumping.
+
+The interface has one method, `scanClasses()` which needs to return an array
+of the class names that can be resolved by the resolver.
 
 ## Caching
 
@@ -187,6 +199,12 @@ in files under this directory following PSR-4 structure.
 To clear the cache, you can use one of the methods 
 `MappingClassLoader::clearCache()` or 
 `MappingClassLoader::clearSpecificClasses()`.
+
+### Pregenerating cache (priming)
+
+Using `MappingClassLoader::primeCache()`, the cache can be generated. The cache
+will be generated only for the resolvers that implement the `IClassScanner`
+interface, for the classes returned by the resolver's `scanClasses()` method.
 
 ## Debug mapping
 
@@ -308,3 +326,21 @@ here.
 
 By implementing your own `IStaticInitializer`, you could introduce more advanced
 features such as static dependency injection.
+
+## Hint files
+
+The `hintCode` property can be set for any `LoadAction` to define code that 
+is not runtime code, but that serves auxiliary tools. Especially for generated
+classes, this code can be used to provide a class hint about the class 
+composition.
+
+Class hints can be dumped to a directory using 
+```php
+MappingClassLoader::dumpHintClasses($dir);
+```
+Every class' hint code will be dumped to a separate file in $dir, using a PSR-4
+structure.
+
+In order for this functionality to work, resolvers that provide hint code must
+also implement the `IClassResolver` interface, so that the loader knows which
+classes the hint files must be generated for.

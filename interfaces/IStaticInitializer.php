@@ -1,8 +1,8 @@
 <?php
 
-namespace Exteon\Loader\MappingClassLoader;
+    namespace Exteon\Loader\MappingClassLoader;
 
-interface IStaticInitializer
-{
-    public function init(string $class): void;
-}
+    interface IStaticInitializer
+    {
+        public function init(string $class): void;
+    }

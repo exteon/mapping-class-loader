@@ -1,9 +1,9 @@
 <?php
 
-namespace Test\Exteon\Loader\MappingClassLoader\Props;
+    namespace Test\Exteon\Loader\MappingClassLoader\Props;
 
-use Exception;
+    use Exception;
 
-class UnknownNsException extends Exception
-{
-}
+    class UnknownNsException extends Exception
+    {
+    }
