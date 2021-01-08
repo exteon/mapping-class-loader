@@ -139,7 +139,12 @@ applies to (the first constructor parameter).
 the searched class. The `LoadAction` constructor is as follows:
 
 ```php
-  public function __construct(string $class, ?string $file, ?string $source = null);
+  public function __construct(
+    string $class, 
+    ?string $file, 
+    ?string $source = null, 
+    ?string $hintCode = null
+  );
 ```
 
 The fields have the following meanings:
