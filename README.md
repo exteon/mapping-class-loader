@@ -185,7 +185,7 @@ the `MappingClassLoader` constructor, like this:
     use Exteon\Loader\MappingClassLoader\StreamWrapLoader;
     
     $loader = new MappingClassLoader(
-        [
+            [
             'enableCaching' => true,
             'cacheDir' => '/tmp/caching'
         ],
@@ -349,3 +349,13 @@ structure.
 In order for this functionality to work, resolvers that provide hint code must
 also implement the `IClassResolver` interface, so that the loader knows which
 classes the hint files must be generated for.
+
+## More examples
+
+To see how this class loader is used to implement a weaving class loader 
+framework for PHP modular plugins providing class chaining, you can take a look
+at 
+[exteon/chaining-class-resolver](https://github.com/exteon/chaining-class-resolver).
+
+You can see there an implementation of an advanced custom resolver making use of
+most of the features of `mapping-class-loader`.
