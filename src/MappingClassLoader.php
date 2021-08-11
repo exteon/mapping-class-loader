@@ -41,7 +41,7 @@
          * @param IClassResolver[] $resolvers
          * @param IStaticInitializer[] $initializers
          * @param IMappingFileLoader $mappingFileLoader
-         * @throws Exception
+         * @throws ErrorException
          */
         public function __construct(
             array $config,
@@ -52,20 +52,24 @@
             $this->resolvers = $resolvers;
             $this->initializers = $initializers;
             $this->isCaching = $config['enableCaching'] ?? false;
+            $this->cacheDir = $config['cacheDir'] ?? null;
             if ($this->isCaching) {
-                if (!($config['cacheDir'] ?? null)) {
-                    throw new Exception('cacheDir is not specified');
+                if (!$this->cacheDir) {
+                    throw new ErrorException('cacheDir is not specified');
                 }
-                $this->cacheDir = $config['cacheDir'];
             }
             $this->mappingFileLoader = $mappingFileLoader;
         }
 
         /**
          * @return bool
+         * @throws ErrorException
          */
         public function clearCache(): bool
         {
+            if (!$this->cacheDir) {
+                throw new ErrorException('cacheDir is not specified');
+            }
             return FileHelper::rmDir($this->cacheDir);
         }
 
