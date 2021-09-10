@@ -4,14 +4,14 @@
 
     use Exception;
 
-    class StreamWrapLoader implements IMappingFileLoader
+    class StreamWrapLoader implements MappingFileLoader
     {
         /**
          * @var array {
          *      enableMapping: bool
          * }
          */
-        protected $config;
+        private $config;
 
         /**
          * StreamWrapLoader constructor.

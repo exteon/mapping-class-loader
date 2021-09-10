@@ -7,7 +7,7 @@ namespace Exteon\Loader\MappingClassLoader\StaticInitializer;
  * classa implements this interface and it has an own classInit() method (not
  * inherited), the class's method will be called.
  */
-interface IClassInitMethodInitializable
+interface ClassInitMethodInitializable
 {
     public static function classInit(): void;
 }

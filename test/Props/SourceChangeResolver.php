@@ -3,10 +3,10 @@
     namespace Test\Exteon\Loader\MappingClassLoader\Props;
 
     use Exception;
-    use Exteon\Loader\MappingClassLoader\IClassResolver;
-    use Exteon\Loader\MappingClassLoader\LoadAction;
+    use Exteon\Loader\MappingClassLoader\ClassResolver;
+    use Exteon\Loader\MappingClassLoader\Data\LoadAction;
 
-    class SourceChangeResolver implements IClassResolver
+    class SourceChangeResolver implements ClassResolver
     {
         protected const ROOT_NS =
             'Test\\Exteon\\Loader\\MappingClassLoader\\PropsRoot';

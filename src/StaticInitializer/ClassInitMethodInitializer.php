@@ -2,14 +2,14 @@
 
     namespace Exteon\Loader\MappingClassLoader\StaticInitializer;
 
-    use Exteon\Loader\MappingClassLoader\IStaticInitializer;
+    use Exteon\Loader\MappingClassLoader\StaticInitializer;
     use ReflectionClass;
     use ReflectionException;
 
-    class ClassInitMethodInitializer implements IStaticInitializer
+    class ClassInitMethodInitializer implements StaticInitializer
     {
         /** @array<string,null> */
-        protected static $initClasses = [];
+        private static $initClasses = [];
 
         /**
          * @param string $class
@@ -20,7 +20,7 @@
             if (!array_key_exists($class, self::$initClasses)) {
                 if (
                     class_exists($class, false) &&
-                    is_a($class, IClassInitMethodInitializable::class, true)
+                    is_a($class, ClassInitMethodInitializable::class, true)
                 ) {
                     $reflection = new ReflectionClass($class);
                     if ($reflection->hasMethod('classInit')) {

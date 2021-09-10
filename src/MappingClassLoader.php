@@ -5,52 +5,46 @@
     use ErrorException;
     use Exception;
     use Exteon\FileHelper;
-    use InvalidArgumentException;
-    use ReflectionException;
+    use Exteon\Loader\MappingClassLoader\Data\LoadAction;
 
-    class MappingClassLoader implements IClassScanner
+    class MappingClassLoader implements ClassScanner
     {
-        protected const
-            MAP_FILE_SUFFIX = '.map',
-            PHP_FILE_SUFFIX = '.php';
+        private const
+            HINT_FILE_SUFFIX = '.php';
 
-        /** @var array<string,null> */
-        protected static $initClasses = [];
-
-        /** @var IClassResolver[] */
-        protected $resolvers;
+        /** @var ClassResolver[] */
+        private $resolvers;
 
         /** @var string */
-        protected $cacheDir;
+        private $cacheDir;
 
         /** @var bool */
-        protected $isCaching;
+        private $isCaching;
 
-        /** @var IMappingFileLoader */
-        protected $mappingFileLoader;
-        /**
-         * @var IStaticInitializer[]
-         */
-        protected $initializers;
+        /** @var MappingFileLoader */
+        private $mappingFileLoader;
+
+        /** @var StaticInitializer|null */
+        private $initializer;
 
         /**
          * @param array $config {
          *      enableCaching: bool,
          *      cacheDir: string
          * }
-         * @param IClassResolver[] $resolvers
-         * @param IStaticInitializer[] $initializers
-         * @param IMappingFileLoader $mappingFileLoader
+         * @param ClassResolver[] $resolvers
+         * @param StaticInitializer|null $initializer
+         * @param MappingFileLoader $mappingFileLoader
          * @throws ErrorException
          */
         public function __construct(
             array $config,
             array $resolvers,
-            array $initializers,
-            IMappingFileLoader $mappingFileLoader
+            ?StaticInitializer $initializer,
+            MappingFileLoader $mappingFileLoader
         ) {
             $this->resolvers = $resolvers;
-            $this->initializers = $initializers;
+            $this->initializer = $initializer;
             $this->isCaching = $config['enableCaching'] ?? false;
             $this->cacheDir = $config['cacheDir'] ?? null;
             if ($this->isCaching) {
@@ -75,18 +69,18 @@
 
         /**
          * @param string[] $classes
-         * @return bool
+         * @throws Exception
          */
-        public function clearSpecificClasses(array $classes): bool
+        public function clearSpecificClasses(array $classes): void
         {
-            $result = true;
             foreach ($classes as $class) {
-                $spec = $this->getCacheFilePath($class);
-                if (file_exists($spec)) {
-                    $result = $result && unlink($spec);
-                }
+                (new ClassCacheEntry(
+                    $this->cacheDir,
+                    $this->mappingFileLoader,
+                    $this->initializer,
+                    $class
+                ))->purge();
             }
-            return $result;
         }
 
         public function register(): void
@@ -102,162 +96,141 @@
         /**
          * @param string $class
          * @throws ErrorException
-         * @throws ReflectionException
          */
         public function loadClass(string $class): void
         {
-            $loaded = false;
             if ($this->isCaching) {
-                $cachedFile = self::getCached($class);
-                if ($cachedFile) {
-                    $mapFileName =
-                        FileHelper::getFileName($cachedFile) .
-                        self::MAP_FILE_SUFFIX;
-                    $mapFilePath = FileHelper::getDescendPath(
-                        FileHelper::getAscendPath($cachedFile),
-                        $mapFileName
+                $classCacheEntry = new ClassCacheEntry(
+                    $this->cacheDir,
+                    $this->mappingFileLoader,
+                    $this->initializer,
+                    $class
+                );
+                if (!$classCacheEntry->load()) {
+                    $chain = $this->getLoadActions($class);
+                    if ($chain) {
+                        $classCacheEntry->cacheAndLoad($chain);
+                    }
+                }
+            } else {
+                $chain = $this->getLoadActions($class);
+                if ($chain) {
+                    $this->loadUncached($chain);
+                }
+            }
+        }
+
+        /**
+         * @param string $class
+         * @return array
+         * @throws ErrorException
+         */
+        private function getLoadActions(string $class): array
+        {
+            foreach ($this->resolvers as $resolver) {
+                $chain = $resolver->resolveClass($class);
+                if ($chain) {
+                    $this->validateChain($chain, $class);
+                    return $chain;
+                }
+            }
+            return [];
+        }
+
+        /**
+         * @param LoadAction[] $chain
+         * @throws ErrorException
+         */
+        private function validateChain(array $chain, string $class): void
+        {
+            foreach ($chain as $loadAction) {
+                if (!$loadAction->getClass()) {
+                    throw new ErrorException(
+                        'Every LoadAction must specify class'
                     );
-                    if (file_exists($mapFilePath)) {
-                        $file = file_get_contents($mapFilePath);
-                        $this->mappingFileLoader->includeOnce(
-                            $cachedFile,
+                }
+                if (
+                    !$loadAction->getSource() &&
+                    !$loadAction->getFile()
+                ) {
+                    throw new ErrorException(
+                        'Either source or file must be specified'
+                    );
+                }
+            }
+            if (end($chain)->getClass() !== $class) {
+                throw new ErrorException(
+                    'Class mismatch'
+                );
+            }
+        }
+
+        /**
+         * @param LoadAction[] $chain
+         */
+        private function loadUncached(array $chain): void
+        {
+            foreach ($chain as $loadAction) {
+                $file = $loadAction->getFile();
+                $source = $loadAction->getSource();
+                if ($source) {
+                    if ($file) {
+                        $this->mappingFileLoader->eval(
+                            $source,
                             $file
                         );
                     } else {
-                        require_once($cachedFile);
-                    }
-                    $loaded = true;
-                }
-            }
-            if (!$loaded) {
-                $loadActions = $this->getLoadActions($class);
-                if (!$loadActions) {
-                    return;
-                }
-                foreach ($loadActions as $loadAction) {
-                    $this->doAction($loadAction);
-                }
-            }
-            $this->classInit($class);
-        }
-
-        /**
-         * @param string $class
-         * @throws ReflectionException
-         */
-        protected function classInit(string $class): void
-        {
-            foreach ($this->initializers as $initializer) {
-                $initializer->init($class);
-            }
-        }
-
-        /**
-         * @param LoadAction $action
-         * @throws ErrorException
-         * @throws ReflectionException
-         */
-        protected function doAction(LoadAction $action): void
-        {
-            if (!$action->getClass()) {
-                throw new InvalidArgumentException(
-                    'class must be specified'
-                );
-            }
-            if ($action->getSource()) {
-                if ($this->isCaching) {
-                    $cachePath = $this->cache($action);
-                    if ($action->getFile()) {
-                        $this->mappingFileLoader->includeOnce(
-                            $cachePath,
-                            $action->getFile()
-                        );
-                    } else {
-                        require_once($cachePath);
+                        $this->mappingFileLoader->eval($source);
                     }
                 } else {
-                    if ($action->getFile()) {
-                        $this->mappingFileLoader->eval(
-                            $action->getSource(),
-                            $action->getFile()
-                        );
-                    } else {
-                        $this->mappingFileLoader->eval($action->getSource());
-                    }
+                    require_once($file);
                 }
-            } elseif ($action->getFile()) {
-                require_once($action->getFile());
-            } else {
-                throw new InvalidArgumentException(
-                    'source or file must be specified'
-                );
+                if($this->initializer){
+                    $this->initializer->init($loadAction->getClass());
+                }
             }
-            $this->classInit($action->getClass());
         }
 
-        /**
-         * @param LoadAction $action
-         * @return string The cached file path
-         * @throws ErrorException
-         */
-        protected function cache(LoadAction $action): string
-        {
-            $filePath = $this->getCacheFilePath($action->getClass());
-            $this->cacheToFile($filePath, $action);
-            return $filePath;
-        }
-
-        /**
-         * @param string $class
-         * @return string|null
-         */
-        protected function getCached(string $class): ?string
-        {
-            $filePath = $this->getCacheFilePath($class);
-            if (file_exists($filePath)) {
-                return $filePath;
-            }
-            return null;
-        }
-
-        public function addResolver(IClassResolver $resolver): void
+        public function addResolver(ClassResolver $resolver): void
         {
             $this->resolvers[] = $resolver;
         }
 
-        public function addInitializer(IStaticInitializer $initializer): void
+        /**
+         * @param string $targetDir
+         * @throws ErrorException
+         */
+        public function dumpHintClasses(string $targetDir): void
         {
-            $this->initializers[] = $initializer;
+            $prefetchActions = $this->getPrefetchActions();
+            foreach ($prefetchActions as $class => $classActions) {
+                foreach ($classActions as $action) {
+                    $mockCode = $action->getHintCode();
+                    if ($mockCode !== null) {
+                        file_put_contents(
+                            $this->getHintFilePath(
+                                $targetDir,
+                                $action->getClass()
+                            ),
+                            $mockCode
+                        );
+                    }
+                }
+            }
         }
 
         /**
-         * @param string $class
-         * @return string
+         * @return array<class-string,LoadAction[]>
+         * @throws ErrorException
          */
-        protected function getCacheFilePath(string $class): string
+        private function getPrefetchActions(): array
         {
-            return $this->getPathInDir($this->cacheDir, $class);
-        }
-
-        /**
-         * @param string $dir
-         * @param string $class
-         * @return string
-         */
-        protected function getPathInDir(string $dir, string $class): string
-        {
-            $classPath = static::classNameToPath($class);
-            $classPath .= self::PHP_FILE_SUFFIX;
-            return FileHelper::getDescendPath($dir, $classPath);
-        }
-
-        /**
-         * @param string $class
-         * @return string
-         */
-        protected static function classNameToPath(string $class): string
-        {
-            return str_replace('\\', '/', $class);
+            $classes = $this->scanClasses();
+            $prefetchActions = [];
+            foreach ($classes as $class) {
+                $prefetchActions[$class] = $this->getLoadActions($class);
+            }
+            return $prefetchActions;
         }
 
         /**
@@ -267,7 +240,7 @@
         {
             $flippedClasses = [];
             foreach ($this->resolvers as $resolver) {
-                if ($resolver instanceof IClassScanner) {
+                if ($resolver instanceof ClassScanner) {
                     $flippedClasses = array_merge(
                         $flippedClasses,
                         array_flip($resolver->scanClasses())
@@ -278,97 +251,26 @@
         }
 
         /**
-         * @return LoadAction[]
+         * @param string $dir
+         * @param string $class
+         * @return string
          */
-        protected function getPrefetchActions(): array
-        {
-            $classes = $this->scanClasses();
-            $prefetchActions = [];
-            foreach ($classes as $class) {
-                $prefetchActions = array_merge(
-                    $prefetchActions,
-                    $this->getLoadActions($class)
-                );
-            }
-            return $prefetchActions;
+        private static function getHintFilePath(
+            string $dir,
+            string $class
+        ): string {
+            $classPath = static::classNameToPath($class);
+            $classPath .= self::HINT_FILE_SUFFIX;
+            return FileHelper::getDescendPath($dir, $classPath);
         }
 
         /**
          * @param string $class
-         * @return array
+         * @return string
          */
-        protected function getLoadActions(string $class): array
+        private static function classNameToPath(string $class): string
         {
-            $loadActions = [];
-            foreach ($this->resolvers as $resolver) {
-                $loadActions = array_merge(
-                    $loadActions,
-                    $resolver->resolveClass($class)
-                );
-            }
-            return $loadActions;
-        }
-
-        /**
-         * @param string $filePath
-         * @param LoadAction $action
-         * @throws ErrorException
-         */
-        protected function cacheToFile(
-            string $filePath,
-            LoadAction $action
-        ): void {
-            $this->cacheContentToFile($filePath, $action->getSource());
-            if ($action->getFile()) {
-                $mapName =
-                    FileHelper::getFileName($filePath) . self::MAP_FILE_SUFFIX;
-                $mapPath = FileHelper::getDescendPath(
-                    FileHelper::getAscendPath($filePath),
-                    $mapName
-                );
-                if (!file_put_contents($mapPath, $action->getFile())) {
-                    throw new ErrorException("Cannot write file");
-                }
-            }
-        }
-
-        /**
-         * @param string $filePath
-         * @param string $contents
-         * @throws ErrorException
-         */
-        protected function cacheContentToFile(
-            string $filePath,
-            string $contents
-        ) {
-            if (!FileHelper::preparePath($filePath, true)) {
-                throw new ErrorException("Cannot create directory");
-            }
-            if (!file_put_contents($filePath, $contents)) {
-                throw new ErrorException("Cannot write file");
-            }
-        }
-
-        /**
-         * @param string $targetDir
-         * @throws ErrorException
-         */
-        public function dumpHintClasses(string $targetDir): void
-        {
-            $prefetchActions = $this->getPrefetchActions();
-            foreach ($prefetchActions as $action) {
-                $mockCode = $action->getHintCode();
-                if ($mockCode !== null) {
-                    $filePath = $this->getPathInDir(
-                        $targetDir,
-                        $action->getClass()
-                    );
-                    $this->cacheContentToFile(
-                        $filePath,
-                        $mockCode
-                    );
-                }
-            }
+            return str_replace('\\', '/', $class);
         }
 
         /**
@@ -377,8 +279,13 @@
         public function primeCache()
         {
             $prefetchActions = $this->getPrefetchActions();
-            foreach ($prefetchActions as $action) {
-                $this->cache($action);
+            foreach ($prefetchActions as $class => $classActions) {
+                (new ClassCacheEntry(
+                    $this->cacheDir,
+                    $this->mappingFileLoader,
+                    $this->initializer,
+                    $class
+                ))->cache($classActions);
             }
         }
     }

@@ -5,34 +5,34 @@
     use ErrorException;
     use Exception;
 
-    class StreamWrapper implements IPHPStreamWrapper
+    class StreamWrapper implements PHPStreamWrapper
     {
         public const
             URL_SCHEME_EVAL = 'exteon-loader-eval',
             URL_SCHEME_INCLUDE = 'exteon-loader-include',
             URL_EVAL_INLINE_HOST = 'INLINE';
 
-        protected const
+        private const
             MODE_INCLUDE = 1,
             MODE_EVAL = 2;
 
         /** @var int */
-        protected $pos;
+        private $pos;
 
         /** @var string */
-        protected $fileRef;
+        private $fileRef;
 
         /** @var string */
-        protected $realFileRef;
+        private $realFileRef;
 
         /** @var int */
-        protected $mode;
+        private $mode;
 
         /** @var string */
-        protected $file;
+        private $file;
 
         /** @var resource */
-        protected $handle;
+        private $handle;
 
         /** @var null|array {
          *      dev: int,
@@ -50,13 +50,13 @@
          *      blocks: int
          *  }
          */
-        protected $stat = null;
+        private $stat = null;
 
         /** @var array<string,string> */
-        protected static $fragments = [];
+        private static $fragments = [];
 
         /** @var int */
-        protected static $uid;
+        private static $uid;
 
         /**
          * @param string $path
@@ -159,7 +159,7 @@
         /**
          * @throws ErrorException
          */
-        protected function initStat()
+        private function initStat()
         {
             if ($this->stat === null) {
                 switch ($this->mode) {
@@ -283,7 +283,7 @@
          * } $parsedUrl
          * @return string
          */
-        protected static function getFullPath(array $parsedUrl): string
+        private static function getFullPath(array $parsedUrl): string
         {
             $path = substr($parsedUrl['path'], 1);
             if (isset($parsedUrl['query'])) {

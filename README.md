@@ -40,7 +40,7 @@ composer require exteon/mapping-class-loader
 multiple resolvers; a resolver is the first thing to implement in order to load
 classes.
 
-Resolvers implement `IclassResolver` to resolve a requested class name to one or
+Resolvers implement `ClassResolver` to resolve a requested class name to one or
 more `LoadAction`'s. A `LoadAction` is the identification of a source code to
 load, which can be one of the three types:
 
@@ -69,10 +69,10 @@ load, which can be one of the three types:
 
 ```php
 <?php
-    use Exteon\Loader\MappingClassLoader\IClassResolver;
-    use Exteon\Loader\MappingClassLoader\LoadAction;
+    use Exteon\Loader\MappingClassLoader\ClassResolver;
+    use Exteon\Loader\MappingClassLoader\Data\LoadAction;
 
-    class Resolver implements IClassResolver {
+    class Resolver implements ClassResolver {
         function resolveClass(string $class) : array{
             $loadActions = [];
             $sourceFile = $class . '.php';
@@ -118,7 +118,7 @@ class ' . $class . ' extends ' . $proxiedClass. '
     $loader = new MappingClassLoader(
         [],
         [new Resolver()],
-        [],
+        null,
         new StreamWrapLoader([])
     );
 
@@ -190,7 +190,7 @@ the `MappingClassLoader` constructor, like this:
             'cacheDir' => '/tmp/caching'
         ],
         [new Resolver()],
-        [],
+        null,
         new StreamWrapLoader([])
     );
 
@@ -235,7 +235,7 @@ to the `StreamWrapLoader` constructor like so:
     $loader = new MappingClassLoader(
         [],
         [new Resolver()],
-        [],
+        null,
         new StreamWrapLoader([
             'enableMapping' => true
         ])
@@ -270,9 +270,9 @@ for the class.
 
 ```php
 <?php
-    use Exteon\Loader\MappingClassLoader\StaticInitializer\IClassInitMethodInitializable;
+    use Exteon\Loader\MappingClassLoader\StaticInitializer\ClassInitMethodInitializable;
     
-    class A  implements IClassInitMethodInitializable {
+    class A  implements ClassInitMethodInitializable {
         protected static $someClassStaticProperty;
         
         public static function classInit() : void{
@@ -295,7 +295,7 @@ for the class.
     $loader = new MappingClassLoader(
         [],
         [new Resolver()],
-        [new ClassInitMethodInitializer()],
+        new ClassInitMethodInitializer(),
         new StreamWrapLoader([])
     );
 
@@ -347,7 +347,7 @@ Every class' hint code will be dumped to a separate file in $dir, using a PSR-4
 structure.
 
 In order for this functionality to work, resolvers that provide hint code must
-also implement the `IClassResolver` interface, so that the loader knows which
+also implement the `ClassResolver` interface, so that the loader knows which
 classes the hint files must be generated for.
 
 ## More examples

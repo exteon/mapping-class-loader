@@ -2,7 +2,7 @@
 
     namespace Exteon\Loader\MappingClassLoader;
 
-    interface IClassScanner
+    interface ClassScanner
     {
         /**
          * @return string[]

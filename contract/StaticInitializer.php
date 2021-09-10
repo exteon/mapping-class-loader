@@ -2,7 +2,7 @@
 
     namespace Exteon\Loader\MappingClassLoader;
 
-    interface IStaticInitializer
+    interface StaticInitializer
     {
         public function init(string $class): void;
     }

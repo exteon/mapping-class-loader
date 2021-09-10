@@ -7,7 +7,7 @@
      * this is the minimal interface that needs to be implemented for PHP's
      * include() operation on a stream.
      */
-    interface IPHPStreamWrapper
+    interface PHPStreamWrapper
     {
         /**
          * @param string $path

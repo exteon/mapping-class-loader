@@ -2,7 +2,7 @@
 
     namespace Exteon\Loader\MappingClassLoader;
 
-    interface IMappingFileLoader
+    interface MappingFileLoader
     {
         /**
          * @param string $code

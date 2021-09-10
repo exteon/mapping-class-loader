@@ -2,6 +2,7 @@
 
     namespace Test\Exteon\Loader\MappingClassLoader;
 
+    use ErrorException;
     use Exception;
     use Exteon\FileHelper;
     use Exteon\Loader\MappingClassLoader\StaticInitializer\ClassInitMethodInitializer;
@@ -10,6 +11,7 @@
     use PHPUnit\Framework\TestCase;
     use Test\Exteon\Loader\MappingClassLoader\Props\SourceChangeResolver;
     use Test\Exteon\Loader\MappingClassLoader\PropsRoot\Bar;
+    use Test\Exteon\Loader\MappingClassLoader\PropsRoot\Chain\Ns2\A;
     use Test\Exteon\Loader\MappingClassLoader\PropsRoot\Foo;
 
     /**
@@ -19,6 +21,7 @@
     {
         /** @var MappingClassLoader */
         protected $mappingClassLoader;
+
         /** @var SourceChangeResolver */
         protected $sourceChangeResolver;
 
@@ -38,6 +41,21 @@
             $bar = new Bar();
             self::assertEquals(1, Foo::isClassInit());
             self::assertEquals(0, Bar::isClassInit());
+        }
+
+        protected function makeClean(): void
+        {
+            if (
+                !FileHelper::rmDir(
+                    $this->sourceChangeResolver::getCacheDirectory(),
+                    false
+                )
+            ) {
+                throw new Exception(
+                    'Cannot delete directory ' .
+                    $this->sourceChangeResolver::getCacheDirectory()
+                );
+            }
         }
 
         /**
@@ -67,57 +85,6 @@
             );
         }
 
-        /**
-         * @depends testSubsequentRun
-         * @doesNotPerformAssertions
-         */
-        public function testXdebugBreakpoint()
-        {
-            $this->checkXdebug();
-            $foo = new Foo();
-            if (!$foo->testXDebug()) {
-                self::markTestSkipped(
-                    "In order to run manual xdebug test, you must have a debugger listening for xdebug connections"
-                );
-            }
-        }
-
-        public function setUp(): void
-        {
-            parent::setUp();
-            $this->sourceChangeResolver = new SourceChangeResolver();
-            $this->mappingClassLoader = new MappingClassLoader(
-                [
-                    'enableCaching' => true,
-                    'cacheDir' => $this->sourceChangeResolver::getCacheDirectory(
-                    )
-                ],
-                [$this->sourceChangeResolver],
-                [new ClassInitMethodInitializer()],
-                new StreamWrapLoader(
-                    [
-                        'enableMapping' => true
-                    ]
-                )
-            );
-            $this->mappingClassLoader->register();
-        }
-
-        protected function makeClean(): void
-        {
-            if (
-            !FileHelper::rmDir(
-                $this->sourceChangeResolver::getCacheDirectory(),
-                false
-            )
-            ) {
-                throw new Exception(
-                    'Cannot delete directory ' .
-                    $this->sourceChangeResolver::getCacheDirectory()
-                );
-            }
-        }
-
         protected static function checkXdebug(): void
         {
             if (!extension_loaded('xdebug')) {
@@ -133,5 +100,44 @@
                     "Extension xdebug must have setting\nxdebug.mode=debug,devel\nin order to test this functionality.\nMaybe set the following environment variable:\nXDEBUG_MODE=debug,develop"
                 );
             }
+        }
+
+        /**
+         * @depends testSubsequentRun
+         * @doesNotPerformAssertions
+         */
+        public function testXdebugBreakpoint()
+        {
+            $this->checkXdebug();
+            $foo = new Foo();
+            if (!$foo->testXDebug()) {
+                self::markTestSkipped(
+                    "In order to run manual xdebug test, you must have a debugger listening for xdebug connections"
+                );
+            }
+        }
+
+        /**
+         * @throws ErrorException
+         */
+        public function setUp(): void
+        {
+            parent::setUpBeforeClass();
+            $this->sourceChangeResolver = new SourceChangeResolver();
+            $this->mappingClassLoader = new MappingClassLoader(
+                [
+                    'enableCaching' => true,
+                    'cacheDir' => $this->sourceChangeResolver::getCacheDirectory(
+                    )
+                ],
+                [$this->sourceChangeResolver],
+                new ClassInitMethodInitializer(),
+                new StreamWrapLoader(
+                    [
+                        'enableMapping' => true
+                    ]
+                )
+            );
+            $this->mappingClassLoader->register();
         }
     }

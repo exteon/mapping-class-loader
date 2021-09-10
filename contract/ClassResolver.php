@@ -2,11 +2,13 @@
 
     namespace Exteon\Loader\MappingClassLoader;
 
+    use Exteon\Loader\MappingClassLoader\Data\LoadAction;
+
     /**
      * Class resolvers are used to resolve a requested class to a series of load
      * actions to be processed by MappingClassLoader
      */
-    interface IClassResolver
+    interface ClassResolver
     {
         /**
          * Returns an array of LoadAction for the cache loader to load the
@@ -15,5 +17,5 @@
          * @param string $class
          * @return LoadAction[]
          */
-        function resolveClass(string $class): array;
+        public function resolveClass(string $class): array;
     }

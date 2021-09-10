@@ -2,9 +2,9 @@
 
     namespace Test\Exteon\Loader\MappingClassLoader\PropsRoot;
 
-    use Exteon\Loader\MappingClassLoader\StaticInitializer\IClassInitMethodInitializable;
+    use Exteon\Loader\MappingClassLoader\StaticInitializer\ClassInitMethodInitializable;
 
-    class Foo implements IClassInitMethodInitializable
+    class Foo implements ClassInitMethodInitializable
     {
         /** @var array<string,int> */
         protected static $isClassInit = [];

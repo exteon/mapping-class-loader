@@ -1,20 +1,20 @@
 <?php
 
-    namespace Exteon\Loader\MappingClassLoader;
+    namespace Exteon\Loader\MappingClassLoader\Data;
 
     class LoadAction
     {
         /** @var string */
-        protected $class;
+        private $class;
 
         /** @var string|null */
-        protected $file;
+        private $file;
 
         /** @var string|null */
-        protected $source;
+        private $source;
 
         /** @var string */
-        protected $hintCode;
+        private $hintCode;
 
         public function __construct(
             string $class,
