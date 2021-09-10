@@ -44,16 +44,7 @@
          */
         public function cacheAndLoad(array $chain): void
         {
-            $this->internalCacheAndLoad($chain,true);
-        }
-
-        /**
-         * @param LoadAction[] $chain
-         * @throws ErrorException
-         */
-        public function cache(array $chain): void
-        {
-            $this->internalCacheAndLoad($chain,false);
+            $this->internalCacheAndLoad($chain, true);
         }
 
         /**
@@ -205,6 +196,15 @@
             );
         }
 
+        /**
+         * @param LoadAction[] $chain
+         * @throws ErrorException
+         */
+        public function cache(array $chain): void
+        {
+            $this->internalCacheAndLoad($chain, false);
+        }
+
         public function load(): bool
         {
             $classFilePath = $this->getClassFilePath();
@@ -219,6 +219,9 @@
                 } else {
                     require_once($classFilePath);
                 }
+                if ($this->initializer) {
+                    $this->initializer->init($this->class);
+                }
                 return true;
             } else {
                 $meta = $this->getMeta();
@@ -226,6 +229,9 @@
                     $includeFile = $meta->getIncludeFile();
                     if ($includeFile) {
                         require_once($includeFile);
+                        if ($this->initializer) {
+                            $this->initializer->init($this->class);
+                        }
                         return true;
                     }
                 }
