@@ -4,15 +4,15 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b430a2831b5eebf1b3237039b5bf33d7",
+    "content-hash": "04ff7cf21f2b9a918fd5a82371f0c961",
     "packages": [
         {
             "name": "exteon/file-helper",
-            "version": "1.5.0",
+            "version": "1.6.0",
             "dist": {
                 "type": "path",
                 "url": "/mnt/libraries/file-helper",
-                "reference": "faba213f8c577f1a53c78de6ce00143a06abc421"
+                "reference": "4206804e8a663b67c1dbb3a5a9538353772de80a"
             },
             "type": "library",
             "autoload": {

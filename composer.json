@@ -1,6 +1,6 @@
 {
   "name": "exteon/mapping-class-loader",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Class loader for PHP with ability to modify on-the-fly and map class files, caching and static initialisation",
   "type": "library",
   "homepage": "https://github.com/exteon/mapping-class-loader",

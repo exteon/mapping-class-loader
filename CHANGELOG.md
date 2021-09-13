@@ -1,3 +1,9 @@
+### 3.0.1
+
+#### Bugfixes
+
+* Fix static class initializations
+
 # 3.0.0
 
 #### Changes
