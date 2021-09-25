@@ -143,6 +143,7 @@
          */
         private function validateChain(array $chain, string $class): void
         {
+            $foundClass = false;
             foreach ($chain as $loadAction) {
                 if (!$loadAction->getClass()) {
                     throw new ErrorException(
@@ -157,8 +158,11 @@
                         'Either source or file must be specified'
                     );
                 }
+                if($loadAction->getClass() === $class){
+                    $foundClass = true;
+                }
             }
-            if (end($chain)->getClass() !== $class) {
+            if (!$foundClass) {
                 throw new ErrorException(
                     'Class mismatch'
                 );
