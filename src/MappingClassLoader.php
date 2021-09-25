@@ -109,6 +109,15 @@
                 if (!$classCacheEntry->load()) {
                     $chain = $this->getLoadActions($class);
                     if ($chain) {
+                        $chainFinalClass = end($chain)->getClass();
+                        if($chainFinalClass !== $class){
+                            $classCacheEntry = new ClassCacheEntry(
+                                $this->cacheDir,
+                                $this->mappingFileLoader,
+                                $this->initializer,
+                                $chainFinalClass
+                            );
+                        }
                         $classCacheEntry->cacheAndLoad($chain);
                     }
                 }
