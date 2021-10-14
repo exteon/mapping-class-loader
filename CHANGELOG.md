@@ -1,3 +1,9 @@
+### 3.0.2
+
+#### Bugfixes
+
+* Requested class may be anywhere on the loaded class chain
+
 ### 3.0.1
 
 #### Bugfixes
