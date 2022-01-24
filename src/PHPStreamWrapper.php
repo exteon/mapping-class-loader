@@ -75,4 +75,6 @@
         public function stream_stat(): array;
 
         public function stream_close(): void;
+
+        public function stream_set_option(int $option, int $arg1, int $arg2): bool;
     }
