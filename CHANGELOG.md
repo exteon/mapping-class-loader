@@ -1,3 +1,9 @@
+# 4.0.0
+
+#### Changes
+
+* Requires PHP 8
+
 ### 3.0.2
 
 #### Bugfixes
