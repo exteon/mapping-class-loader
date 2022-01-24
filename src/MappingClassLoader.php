@@ -220,11 +220,13 @@
                 foreach ($classActions as $action) {
                     $mockCode = $action->getHintCode();
                     if ($mockCode !== null) {
+                        $hintFilePath = $this->getHintFilePath(
+                            $targetDir,
+                            $action->getClass()
+                        );
+                        FileHelper::preparePath($hintFilePath,true);
                         file_put_contents(
-                            $this->getHintFilePath(
-                                $targetDir,
-                                $action->getClass()
-                            ),
+                            $hintFilePath,
                             $mockCode
                         );
                     }
