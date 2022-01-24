@@ -11,7 +11,7 @@
          *      enableMapping: bool
          * }
          */
-        private $config;
+        private array $config;
 
         /**
          * StreamWrapLoader constructor.
@@ -43,12 +43,6 @@
                 $mapToFile &&
                 ($this->config['enableMapping'] ?? false)
             ) {
-                if (!$mapToFile) {
-                    $mapToFile =
-                        StreamWrapper::URL_EVAL_INLINE_HOST .
-                        '/' .
-                        StreamWrapper::getUid();
-                }
                 StreamWrapper::setFragment($mapToFile, $code);
                 include(StreamWrapper::URL_SCHEME_EVAL . '://-/' . $mapToFile);
             } else {

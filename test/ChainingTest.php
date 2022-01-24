@@ -20,11 +20,8 @@
      */
     class ChainingTest extends TestCase
     {
-        /** @var MappingClassLoader */
-        protected $mappingClassLoader;
-
-        /** @var SourceChangeResolver */
-        protected $resolver;
+        protected MappingClassLoader $mappingClassLoader;
+        protected ChainingResolver $resolver;
 
         /**
          * @throws ErrorException
@@ -45,6 +42,9 @@
             $this->mappingClassLoader->register();
         }
 
+        /**
+         * @throws Exception
+         */
         public function testClearSpecificClasses(): void
         {
             $this->makeClean();
@@ -85,6 +85,9 @@
             );
         }
 
+        /**
+         * @throws Exception
+         */
         protected function makeClean(): void
         {
             if (

@@ -4,17 +4,10 @@
 
     class LoadAction
     {
-        /** @var string */
-        private $class;
-
-        /** @var string|null */
-        private $file;
-
-        /** @var string|null */
-        private $source;
-
-        /** @var string */
-        private $hintCode;
+        private string $class;
+        private ?string $file;
+        private ?string $source;
+        private ?string $hintCode;
 
         public function __construct(
             string $class,

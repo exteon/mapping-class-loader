@@ -6,7 +6,7 @@
     class MultiStaticInitializer implements StaticInitializer
     {
         /** @var StaticInitializer[] */
-        private $initializers;
+        private array $initializers;
 
         /**
          * @param StaticInitializer[] $initializers

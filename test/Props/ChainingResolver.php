@@ -38,7 +38,7 @@
         {
             try {
                 $unprefixedClass = static::getUnprefixedClass($class);
-            } catch (UnknownNsException $e) {
+            } catch (UnknownNsException) {
                 return [];
             }
 
@@ -55,6 +55,9 @@
             ];
         }
 
+        /**
+         * @throws UnknownNsException
+         */
         protected static function getUnprefixedClass(string $class): ?string
         {
             if (

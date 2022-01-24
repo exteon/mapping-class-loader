@@ -7,7 +7,7 @@
     class Foo implements ClassInitMethodInitializable
     {
         /** @var array<string,int> */
-        protected static $isClassInit = [];
+        protected static array $isClassInit = [];
 
         public static function classInit(): void
         {

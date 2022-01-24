@@ -16,20 +16,11 @@
             MODE_INCLUDE = 1,
             MODE_EVAL = 2;
 
-        /** @var int */
-        private $pos;
-
-        /** @var string */
-        private $fileRef;
-
-        /** @var string */
-        private $realFileRef;
-
-        /** @var int */
-        private $mode;
-
-        /** @var string */
-        private $file;
+        private int $pos;
+        private string $fileRef;
+        private string $realFileRef;
+        private int $mode;
+        private string $file;
 
         /** @var resource */
         private $handle;
@@ -50,13 +41,13 @@
          *      blocks: int
          *  }
          */
-        private $stat = null;
+        private ?array $stat = null;
 
         /** @var array<string,string> */
-        private static $fragments = [];
+        private static array $fragments = [];
 
         /** @var int */
-        private static $uid;
+        private static int $uid;
 
         /**
          * @param string $path
@@ -145,15 +136,12 @@
          */
         public function stream_eof(): bool
         {
-            switch ($this->mode) {
-                case self::MODE_EVAL:
-                    return $this->pos >=
-                        strlen(self::$fragments[$this->fileRef]);
-                case self::MODE_INCLUDE:
-                    return feof($this->handle);
-                default:
-                    throw new ErrorException('Unknown operation mode');
-            }
+            return match ($this->mode) {
+                self::MODE_EVAL => $this->pos >=
+                    strlen(self::$fragments[$this->fileRef]),
+                self::MODE_INCLUDE => feof($this->handle),
+                default => throw new ErrorException('Unknown operation mode'),
+            };
         }
 
         /**

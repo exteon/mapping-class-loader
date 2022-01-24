@@ -13,19 +13,12 @@
             HINT_FILE_SUFFIX = '.php';
 
         /** @var ClassResolver[] */
-        private $resolvers;
+        private array $resolvers;
 
-        /** @var string */
-        private $cacheDir;
-
-        /** @var bool */
-        private $isCaching;
-
-        /** @var MappingFileLoader */
-        private $mappingFileLoader;
-
-        /** @var StaticInitializer|null */
-        private $initializer;
+        private ?string $cacheDir;
+        private bool $isCaching;
+        private MappingFileLoader $mappingFileLoader;
+        private ?StaticInitializer $initializer;
 
         /**
          * @param array $config {
@@ -198,9 +191,7 @@
                 } else {
                     require_once($file);
                 }
-                if($this->initializer){
-                    $this->initializer->init($loadAction->getClass());
-                }
+                $this->initializer?->init($loadAction->getClass());
             }
         }
 
@@ -216,7 +207,7 @@
         public function dumpHintClasses(string $targetDir): void
         {
             $prefetchActions = $this->getPrefetchActions();
-            foreach ($prefetchActions as $class => $classActions) {
+            foreach ($prefetchActions as $classActions) {
                 foreach ($classActions as $action) {
                     $mockCode = $action->getHintCode();
                     if ($mockCode !== null) {

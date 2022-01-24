@@ -19,12 +19,12 @@
      */
     class MappingClassLoaderTest extends TestCase
     {
-        /** @var MappingClassLoader */
-        protected $mappingClassLoader;
+        protected MappingClassLoader $mappingClassLoader;
+        protected SourceChangeResolver $sourceChangeResolver;
 
-        /** @var SourceChangeResolver */
-        protected $sourceChangeResolver;
-
+        /**
+         * @throws Exception
+         */
         public function testInitialRun()
         {
             $this->makeClean();
@@ -43,6 +43,9 @@
             self::assertEquals(0, Bar::isClassInit());
         }
 
+        /**
+         * @throws Exception
+         */
         protected function makeClean(): void
         {
             if (

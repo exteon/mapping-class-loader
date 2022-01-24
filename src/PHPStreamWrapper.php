@@ -21,7 +21,7 @@
             string $mode,
             int $options,
             &$opened_path
-        );
+        ): bool;
 
         /**
          * @param int $count

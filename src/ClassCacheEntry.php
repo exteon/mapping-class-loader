@@ -6,6 +6,7 @@
     use Exception;
     use Exteon\FileHelper;
     use Exteon\Loader\MappingClassLoader\Data\LoadAction;
+    use JetBrains\PhpStorm\Pure;
 
     class ClassCacheEntry
     {
@@ -14,17 +15,10 @@
             PHP_FILE_SUFFIX = '.php',
             META_FILE_SUFFIX = '.meta.php';
 
-        /** @var string */
-        private $cacheDir;
-
-        /** @var string */
-        private $class;
-
-        /** @var MappingFileLoader */
-        private $mappingFileLoader;
-
-        /** @var StaticInitializer|null */
-        private $initializer;
+        private string $cacheDir;
+        private string $class;
+        private MappingFileLoader $mappingFileLoader;
+        private ?StaticInitializer $initializer;
 
         public function __construct(
             string $cacheDir,
@@ -186,6 +180,7 @@
          * @param string $class
          * @return ClassCacheEntry
          */
+        #[Pure]
         private function getClassCacheEntry(string $class): ClassCacheEntry
         {
             return new self(
@@ -219,9 +214,7 @@
                 } else {
                     require_once($classFilePath);
                 }
-                if ($this->initializer) {
-                    $this->initializer->init($this->class);
-                }
+                $this->initializer?->init($this->class);
                 return true;
             } else {
                 $meta = $this->getMeta();
@@ -229,9 +222,7 @@
                     $includeFile = $meta->getIncludeFile();
                     if ($includeFile) {
                         require_once($includeFile);
-                        if ($this->initializer) {
-                            $this->initializer->init($this->class);
-                        }
+                        $this->initializer?->init($this->class);
                         return true;
                     }
                 }

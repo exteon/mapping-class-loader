@@ -1,13 +1,14 @@
 <?php
     namespace Exteon\Loader\MappingClassLoader;
 
+    use JetBrains\PhpStorm\Pure;
+
     class CachedClassMeta
     {
-        /** @var string|null */
-        private $includeFile;
+        private ?string $includeFile;
 
         /** @var string[] */
-        private $classChain;
+        private array $classChain;
 
         /**
          * @param string|null $includeFile
@@ -18,6 +19,7 @@
             $this->classChain = $classChain;
         }
 
+        #[Pure]
         public static function fromArray(array $array): self {
             return new self(
                 $array['include'] ?? null,

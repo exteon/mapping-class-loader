@@ -4,5 +4,5 @@
 
     class Bar extends Foo
     {
-        protected static $isClassInit = false;
+        protected static array $isClassInit = false;
     }

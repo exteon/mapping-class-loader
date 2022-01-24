@@ -9,7 +9,7 @@
     class ClassInitMethodInitializer implements StaticInitializer
     {
         /** @array<string,null> */
-        private static $initClasses = [];
+        private static array $initClasses = [];
 
         /**
          * @param string $class

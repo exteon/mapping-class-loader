@@ -12,13 +12,16 @@
             'Test\\Exteon\\Loader\\MappingClassLoader\\PropsRoot';
 
         /** @var array<string, bool> */
-        protected $resolvedClasses = [];
+        protected array $resolvedClasses = [];
 
+        /**
+         * @throws Exception
+         */
         function resolveClass(string $class): array
         {
             try {
                 $unprefixedClass = static::getUnprefixedClass($class);
-            } catch (UnknownNsException $e) {
+            } catch (UnknownNsException) {
                 return [];
             }
 
@@ -36,7 +39,7 @@
 
             $contents = file_get_contents($classPath);
             $replaced = preg_replace(
-                '`~~~\\[(.*?)\\]~~~`s',
+                '`~~~\\[(.*?)]~~~`s',
                 '~~~[replaced-$1]~~~',
                 $contents
             );
@@ -45,6 +48,9 @@
             return [$loadAction];
         }
 
+        /**
+         * @throws UnknownNsException
+         */
         protected static function getUnprefixedClass(string $class): ?string
         {
             if (
@@ -71,6 +77,9 @@
             return str_replace('\\', '/', $ns);
         }
 
+        /**
+         * @throws UnknownNsException
+         */
         public static function classNameToSourceFilename(string $class): string
         {
             $unprefixedClass = static::getUnprefixedClass($class);
@@ -98,6 +107,9 @@
                 '.php';
         }
 
+        /**
+         * @throws UnknownNsException
+         */
         public function didResolveClass(string $class): bool
         {
             $unprefixedClass = static::getUnprefixedClass($class);
