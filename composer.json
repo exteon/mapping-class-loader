@@ -33,5 +33,10 @@
   },
   "suggest": {
     "ext-xdebug": "*"
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "4.x-dev"
+    }
   }
 }
